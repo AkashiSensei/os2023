@@ -14,7 +14,7 @@ else
     ;;
     "--find")
         # Your code here. (3/4)
-	grep $3 >${3}.txt
+	grep $3 $1 > $3.txt
 
     ;;
     "--diff")
