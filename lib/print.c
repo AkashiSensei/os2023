@@ -19,6 +19,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 	for (;;) {
 		/* scan for the next '%' */
 		/* Exercise 1.4: Your code here. (1/8) */
+		
 
 		/* flush the string found so far */
 		/* Exercise 1.4: Your code here. (2/8) */
