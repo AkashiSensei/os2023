@@ -11,7 +11,8 @@ EXPORT(_start)
 	/* hint: you can reference the memory layout in include/mmu.h */
 	/* set up the kernel stack */
 	/* Exercise 1.3: Your code here. (1/2) */
-	addiu sp, zero, 0x80400000
+	lui sp, 0x8040
+	ori sp, 0x0000
 
 	/* jump to mips_init */
 	/* Exercise 1.3: Your code here. (2/2) */
