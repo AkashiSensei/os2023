@@ -24,11 +24,12 @@ struct Page {
 
 extern struct Page *pages;
 extern struct Page_list page_free_list;
-
+//get the index of pp
 static inline u_long page2ppn(struct Page *pp) {
 	return pp - pages;
 }
 
+// get the physical addr of pp
 static inline u_long page2pa(struct Page *pp) {
 	return page2ppn(pp) << PGSHIFT;
 }
@@ -40,18 +41,22 @@ static inline struct Page *pa2page(u_long pa) {
 	return &pages[PPN(pa)];
 }
 
+//get the vitual addr of pp
 static inline u_long page2kva(struct Page *pp) {
 	return KADDR(page2pa(pp));
 }
 
+// get physical addr using vitual addr and pgdir
 static inline u_long va2pa(Pde *pgdir, u_long va) {
 	Pte *p;
 
 	pgdir = &pgdir[PDX(va)];
+	//printk("%x\n", *pgdir);
 	if (!(*pgdir & PTE_V)) {
 		return ~0;
 	}
 	p = (Pte *)KADDR(PTE_ADDR(*pgdir));
+	//printk("%x\n", p[PTX(va)]);
 	if (!(p[PTX(va)] & PTE_V)) {
 		return ~0;
 	}
