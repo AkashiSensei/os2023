@@ -106,6 +106,16 @@ void page_init(void) {
 
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
+	
+
+	/***
+	u_long low = (freemem - KSEG0) / BY2PG;
+	for (index = npage - 1; index >= low; index--) {
+		pages[index].pp_ref = 0;
+		LIST_INSERT_HEAD(&page_free_list, &pages[index], pp_link);
+	}
+	***/
+	
 	for (index = (freemem - KSEG0) / BY2PG; index < npage; index++) {
 		pages[index].pp_ref = 0;
 		LIST_INSERT_HEAD(&page_free_list, &pages[index], pp_link);
@@ -418,8 +428,14 @@ void physical_memory_manage_check(void) {
 
 void page_check(void) {
 	Pde *boot_pgdir = alloc(BY2PG, BY2PG, 1);
+
+	
 	struct Page *pp, *pp0, *pp1, *pp2;
 	struct Page_list fl;
+	/***
+	page_alloc(&pp0);
+	Pde *boot_pgdir = page2kva(pp0); 
+	***/
 
 	// should be able to allocate three pages
 	pp0 = pp1 = pp2 = 0;
