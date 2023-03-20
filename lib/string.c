@@ -1,4 +1,32 @@
 #include <types.h>
+#include <print.h>
+#include <trap.h>
+#include <drivers/dev_cons.h>
+typedef struct prints_data {
+	char * dst;
+	long off;
+	size_t cnt;
+}ps_data;
+
+void outputs(void *data, const char *buf, size_t len) {
+	ps_data * psd = (ps_data*) data;
+	for(int i = 0; i < len; i++) {
+		psd->dst[psd->off++] = buf[i];
+		psd->cnt++;
+	}
+}
+
+
+int sprintf(char *buf, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	ps_data data = {buf, 0, 0};
+	vprintfmt(outputs, &data, fmt, ap);
+	va_end(ap);
+
+	data.dst[data.off++] = '\0';
+	return data.cnt;
+}
 
 void *memcpy(void *dst, const void *src, size_t n) {
 	void *dstaddr = dst;
