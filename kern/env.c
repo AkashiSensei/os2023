@@ -122,9 +122,11 @@ int envid2env(u_int envid, struct Env **penv, int checkperm) {
 	e = &envs[ENVX(envid)];
 	if (envid == 0) {
 		*penv = curenv;
+		return 0;
 	}
 
 	if (e->env_status == ENV_FREE || e->env_id != envid) {
+		// printk("upper %d, %d\n", e->env_status == ENV_FREE, e->env_id != envid);
 		return -E_BAD_ENV;
 	}
 	
@@ -137,6 +139,7 @@ int envid2env(u_int envid, struct Env **penv, int checkperm) {
 	 */
 	/* Exercise 4.3: Your code here. (2/2) */
 	if (checkperm && e != curenv && e->env_parent_id != curenv->env_id) {
+		// printk("lower %d, %d\n", e != curenv, e->env_parent_id != curenv->env_id);
 		return -E_BAD_ENV;
 	}
 
