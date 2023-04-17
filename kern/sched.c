@@ -17,7 +17,8 @@
 void schedule(int yield) {
 	static int count = 0; // remaining time slices of current env
 	struct Env *e = curenv;
-
+	static int user_time[5] = {0};
+	// static Env * last_env[5] = {NULL};
 	/* We always decrease the 'count' by 1.
 	 *
 	 * If 'yield' is set, or 'count' has been decreased to 0, or 'e' (previous 'curenv') is
@@ -35,23 +36,67 @@ void schedule(int yield) {
 	 *   'TAILQ_FIRST', 'TAILQ_REMOVE', 'TAILQ_INSERT_TAIL'
 	 */
 	/* Exercise 3.12: Your code here. */
-	count--;
+	int has_ready_env[5] = {0};
+	struct Env * env_i;
+	TAILQ_FOREACH(env_i, &env_sched_list, env_sched_link) {
+		has_ready_env[env_i->env_user] = 1;
+	}
 
 	if(yield || count <= 0 || e == NULL || e->env_status != ENV_RUNNABLE) {
-		if(e != NULL) {
-			if(e == TAILQ_FIRST(&env_sched_list)) {
-				TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
-			}
-			if(e->env_status == ENV_RUNNABLE) {
-				TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
-			}
+		if(e != NULL && e->env_status == ENV_RUNNABLE) {
+			TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
+			TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+			user_time[e->env_user] += e->env_pri;
 		}
 		if(TAILQ_EMPTY(&env_sched_list)) {
 			panic("schedule: no runnable envs\n");
 		}
-		e = TAILQ_FIRST(&env_sched_list);
+		
+
+		int user_next = -1, min_time = 100000000;
+		for(int i = 0; i < 5; i++) {
+			if (has_ready_env[i] == 1 && user_time[i] < min_time) {
+				user_next = i;
+				min_time = user_time[i];
+			}
+		}
+		assert(user_next != -1);
+		/*
+		env_i = last_env[user_next];
+		if(env_i != NULL) {
+			env_i = TAILQ_NEXT(env_i, env_sched_link);
+		}
+
+		if(env_i == NULL) {
+			env_i = TAILQ_FIRST(&env_sched_list);
+		}
+
+		e = NULL;
+		for(; env_i; env_i = env_i->env_sched_link.tqe_next) {
+			if(env_i.env_user == user_next) {
+				e = env_i;
+				break;
+			}
+		}
+		if(e == NULL) {
+			TAILQ_FOREACH(env_i, &env_sched_list, env_sched_link) {
+				if(env_i.env_user == user_next) {
+					e = env_i;
+					break;
+				}
+			}
+		}
+		*/
+		TAILQ_FOREACH(env_i, &env_sched_list, env_sched_link) {
+			if(env_i->env_user == user_next) {
+				e = env_i;
+				break;
+			}
+		}
+		assert(e != NULL);
 		count = e->env_pri;
 	}
+	count--;
 	env_run(e);
 
 }
