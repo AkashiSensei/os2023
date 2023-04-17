@@ -7,7 +7,7 @@ void exit(void) {
 #if !defined(LAB) || LAB >= 5
 	close_all();
 #endif
-
+	// debugf("%d\n", syscall_env_destroy(0));
 	syscall_env_destroy(0);
 	user_panic("unreachable code");
 }
