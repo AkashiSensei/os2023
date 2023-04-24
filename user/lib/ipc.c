@@ -24,7 +24,7 @@ void ipc_broadcast(u_int val, void * srcva, u_int perm) {
 
 void ipc_broadcast_send(u_int p_envid, u_int val, void * srcva, u_int perm) {
 	int num = 0;
-	struct Env *child_envs[10];
+	struct Env *child_envs[15];
 	int i;
 
 	for(i = 0; i < NENV; i++) {
