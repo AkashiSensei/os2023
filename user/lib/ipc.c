@@ -17,6 +17,9 @@ void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm) {
 	user_assert(r == 0);
 }
 void ipc_broadcast(u_int val, void * srcva, u_int perm) {
+	if(srcva < UTEMP || srcva > UTOP) {
+		return;
+	}
 	u_int id;
 	id = syscall_getenvid();
 	ipc_broadcast_send(id, val, srcva, perm);
