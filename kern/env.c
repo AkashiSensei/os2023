@@ -277,6 +277,10 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	e->env_tf.cp0_status = STATUS_IM4 | STATUS_KUp | STATUS_IEp;
 	// Keep space for 'argc' and 'argv'.
 	e->env_tf.regs[29] = USTACKTOP - sizeof(int) - sizeof(char **);
+	
+	// 4-1-exam
+	e->env_gid = 0;
+
 
 	/* Step 5: Remove the new Env from env_free_list. */
 	/* Exercise 3.4: Your code here. (4/4) */
