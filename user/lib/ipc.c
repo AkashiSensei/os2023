@@ -41,8 +41,9 @@ void ipc_broadcast_send(u_int p_envid, u_int val, void * srcva, u_int perm) {
 	}
 
 	for(i = 0; i < num; i++) {
-		ipc_send(child_envs[i]->env_id, val, srcva, perm);
+		//ipc_send(child_envs[i]->env_id, val, srcva, perm);
 		ipc_broadcast_send(child_envs[i]->env_id, val, srcva, perm);
+		ipc_send(child_envs[i]->env_id, val, srcva, perm);
 	}
 }
 // Receive a value.  Return the value and store the caller's envid
