@@ -119,6 +119,8 @@ int remove(const char *path);
 int ftruncate(int fd, u_int size);
 int sync(void);
 
+void ipc_broadcast(u_int val, void * srcva, u_int perm);
+
 #define user_assert(x)                                                                             \
 	do {                                                                                       \
 		if (!(x))                                                                          \
