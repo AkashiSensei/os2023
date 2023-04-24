@@ -37,3 +37,16 @@ u_int ipc_recv(u_int *whom, void *dstva, u_int *perm) {
 
 	return env->env_ipc_value;
 }
+
+void set_gid(u_int gid) {
+    syscall_set_gid(gid);
+}
+
+int ipc_group_send(u_int whom, u_int val, const void *srcva, u_int perm) {
+    int r;
+    while ((r = syscall_ipc_try_group_send(whom, val, srcva, perm)) != 0) {
+        if (r == -E_IPC_NOT_RECV) syscall_yield();
+        if (r == -E_IPC_NOT_GROUP) return -E_IPC_NOT_GROUP;
+    }
+    return 0;
+}
