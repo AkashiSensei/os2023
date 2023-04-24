@@ -84,8 +84,7 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Step 1: Get the permission of the page. */
 	/* Hint: Use 'vpt' to find the page table entry. */
 	/* Exercise 4.10: Your code here. (1/2) */
-	Pte * pte = vpt + vpn;
-	perm = *pte & 0xfff;
+	perm = vpt[vpn] & 0xfff;
 	addr = vpn * BY2PG;
 
 	/* Step 2: If the page is writable, and not shared with children, and not marked as COW yet,
@@ -93,9 +92,11 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Hint: The page should be first mapped to the child before remapped in the parent. (Why?)
 	 */
 	/* Exercise 4.10: Your code here. (2/2) */
+	/*
 	if ((perm & PTE_V) == 0) {
 		return;
-	}
+	}*/
+
 
 	if ((perm & PTE_D) && !(perm & PTE_COW) && !(perm & PTE_LIBRARY)) {
 		perm &= ~PTE_D;
@@ -142,7 +143,9 @@ int fork(void) {
 	/* Exercise 4.15: Your code here. (1/2) */
 	if (child != 0) {
 		for(i = 0; i < VPN(USTACKTOP); i++) {
-			duppage(child, i);
+			if((vpd[i >> 10] & PTE_V) && (vpt[i] & PTE_V)) {
+				duppage(child, i);
+			}
 		}
 	}
 
