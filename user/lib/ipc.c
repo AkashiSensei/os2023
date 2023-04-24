@@ -31,7 +31,7 @@ void ipc_broadcast_send(u_int p_envid, u_int val, void * srcva, u_int perm) {
 	int i;
 
 	for(i = 0; i < NENV; i++) {
-		if(env[i].env_parent_id == p_envid) {
+		if(env[i].env_status != ENV_FREE && env[i].env_parent_id == p_envid) {
 			child_envs[num++] = &envs[i];
 		}
 	}
