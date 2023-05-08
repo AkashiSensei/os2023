@@ -515,19 +515,20 @@ int sys_barrier_alloc(int n) {
 }
 
 void sys_barrier_wait() {
-	printk("barrier: %x\n", curenv->e_barrier);
+	//printk("barrier: %x\n", curenv->e_barrier);
 	if (curenv->e_barrier == NULL) {
 		return;
 	}
-
-	if (curenv->e_barrier->wait_cnt < curenv->e_barrier->n - 1) {
+	
+	printk("wait_cnt: %d\n", curenv->e_barrier->wait_cnt);
+	if (curenv->e_barrier->wait_cnt < curenv->e_barrier->n) {
 		curenv->env_status = ENV_NOT_RUNNABLE;
 		TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
 		curenv->e_barrier->envw[(curenv->e_barrier->wait_cnt)++] = curenv;
 		schedule(1);
-	}else if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n - 1) {
+	}else if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
 		int i;
-		for(i = 0; i < curenv->e_barrier->n - 1; i++) {
+		for(i = 0; i < curenv->e_barrier->n; i++) {
 			curenv->e_barrier->envw[i]->env_status = ENV_RUNNABLE;
 			TAILQ_INSERT_TAIL(&env_sched_list, curenv->e_barrier->envw[i], env_sched_link);
 		}
