@@ -513,7 +513,7 @@ int sys_barrier_alloc(int n) {
 	curenv->e_barrier->wait_cnt = 0;
 	return 0;
 }
-
+void awake(struct Barrier *);
 void sys_barrier_wait() {
 	//printk("barrier: %x\n", curenv->e_barrier);
 	if (curenv->e_barrier == NULL) {
@@ -526,16 +526,30 @@ void sys_barrier_wait() {
 		TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
 		curenv->e_barrier->envw[(curenv->e_barrier->wait_cnt)++] = curenv;
 		schedule(1);
-	}else if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
-		int i;
-		for(i = 0; i < curenv->e_barrier->n; i++) {
-			curenv->e_barrier->envw[i]->env_status = ENV_RUNNABLE;
-			TAILQ_INSERT_TAIL(&env_sched_list, curenv->e_barrier->envw[i], env_sched_link);
-		}
+	}
+	if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
+		//int i;
+		//for(i = 0; i < curenv->e_barrier->n; i++) {
+		//	curenv->e_barrier->envw[i]->env_status = ENV_RUNNABLE;
+		//	TAILQ_INSERT_TAIL(&env_sched_list, curenv->e_barrier->envw[i], env_sched_link);
+		//}
+		//curenv->e_barrier = NULL;
+		//schedule(1);
+		awake(curenv->e_barrier);
 		curenv->e_barrier = NULL;
-		schedule(1);
 	}
 }
+
+void awake(struct Barrier * barr) {
+	int i;
+	if(barr->n != barr->wait_cnt) return;
+	for(i = 0; i < barr->n; i++) {
+		barr->envw[i]->env_status = ENV_RUNNABLE;
+		TAILQ_INSERT_TAIL(&env_sched_list, barr->envw[i], env_sched_link);
+	}
+	schedule(1);
+}
+
 
 
 void *syscall_table[MAX_SYSNO] = {

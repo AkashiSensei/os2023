@@ -1,7 +1,7 @@
 #include <lib.h>
 
 int main() {
-	barrier_alloc(5);
+	barrier_alloc(10);
 	for (int i = 0; i < 9; i++) {
 		int who = fork();
 		if (who == 0) {
@@ -13,7 +13,7 @@ int main() {
 			//	syscall_panic("Wrong www\n");
 			//}
 			barrier_wait();
-			debugf("OUT!\n");
+			//debugf("OUT!\n");
 			//syscall_panic("Wrong block!");
 		}
 	}
