@@ -138,15 +138,14 @@ int map_block(u_int blockno) {
 	// Step 1: If the block is already mapped in cache, return 0.
 	// Hint: Use 'block_is_mapped'.
 	/* Exercise 5.7: Your code here. (1/5) */
-	void *va;
-	if ((va = block_is_mapped(blockno)) == NULL) {
+	if (block_is_mapped(blockno) != NULL) {
 		return 0;
 	}
 	// Step 2: Alloc a page in permission 'PTE_D' via syscall.
 	// Hint: Use 'diskaddr' for the virtual address.
 	/* Exercise 5.7: Your code here. (2/5) */
 	int r;
-	if ((r = syscall_mem_alloc(0, va, PTE_D)) != 0 ) {
+	if ((r = syscall_mem_alloc(0, diskaddr(blockno), PTE_D)) != 0 ) {
 		return r;
 	}
 	return 0;
