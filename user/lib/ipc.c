@@ -47,5 +47,4 @@ void barrier_wait(void) {
 	while (env->e_barrier->wait_cnt < env->e_barrier->n) {
 		syscall_yield();
 	}
-	env->e_barrier = NULL;
 }
