@@ -522,12 +522,12 @@ void sys_barrier_wait() {
 	
 	printk("wait_cnt: %d\n", curenv->e_barrier->wait_cnt);
 	if (curenv->e_barrier->wait_cnt < curenv->e_barrier->n) {
-		curenv->env_status = ENV_NOT_RUNNABLE;
-		TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
+		//curenv->env_status = ENV_NOT_RUNNABLE;
+		//TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
 		curenv->e_barrier->envw[(curenv->e_barrier->wait_cnt)++] = curenv;
-		schedule(1);
+		//schedule(1);
 	}
-	if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
+	//if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
 		//int i;
 		//for(i = 0; i < curenv->e_barrier->n; i++) {
 		//	curenv->e_barrier->envw[i]->env_status = ENV_RUNNABLE;
@@ -535,9 +535,9 @@ void sys_barrier_wait() {
 		//}
 		//curenv->e_barrier = NULL;
 		//schedule(1);
-		awake(curenv->e_barrier);
-		curenv->e_barrier = NULL;
-	}
+	//	awake(curenv->e_barrier);
+	//	curenv->e_barrier = NULL;
+	//}
 }
 
 void awake(struct Barrier * barr) {
