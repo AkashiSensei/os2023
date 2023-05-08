@@ -497,16 +497,7 @@ int sys_write_dev(u_int va, u_int pa, u_int len) {
 		return -E_INVAL;
 	}
 
-	struct Page *p;
-	if ((p = page_lookup(cur_pgdir, va, NULL)) == NULL) {
-		return -E_INVAL;
-	}
-
-	u_int src_kva;
-	u_int dst_kva;
-	src_kva = KADDR(page2pa(p)) + (va & 0xFFF);
-	dst_kva = pa + KSEG1;
-	memcpy((void *)dst_kva, (void *)src_kva, len);
+	memcpy((void *)(pa | KSEG1), (void *)va, len);
 	return 0;
 }
 
@@ -524,7 +515,7 @@ int sys_write_dev(u_int va, u_int pa, u_int len) {
 int sys_read_dev(u_int va, u_int pa, u_int len) {
 	/* Exercise 5.1: Your code here. (2/2) */
 	if (is_illegal_va_range(va, len)) {
-                return -E_INVAL;
+		return -E_INVAL;
         }
 
         if (len < 0) {
@@ -534,19 +525,10 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
         if ((pa < DEV_CONS_ADDRESS || pa + len > DEV_CONS_ADDRESS + DEV_CONS_LENGTH) &&
                 (pa < DEV_DISK_ADDRESS || pa + len > DEV_DISK_ADDRESS + DEV_DISK_BUFFER + DEV_DISK_BUFFER_LEN) &&
                 (pa < DEV_RTC_ADDRESS || pa + len > DEV_RTC_ADDRESS + DEV_RTC_LENGTH)){
-                return -E_INVAL;
+		return -E_INVAL;
         }
 
-        struct Page *p;
-        if ((p = page_lookup(cur_pgdir, va, NULL)) == NULL) {
-                return -E_INVAL;
-        }
-
-        u_int src_kva;
-        u_int dst_kva;
-        dst_kva = KADDR(page2pa(p)) + (va & 0xFFF);
-        src_kva = pa + KSEG1;
-        memcpy((void *)dst_kva, (void *)src_kva, len);
+        memcpy((void *)va, (void *)(pa | KSEG1), len);
 	return 0;
 }
 
