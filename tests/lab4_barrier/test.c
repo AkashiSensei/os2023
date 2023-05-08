@@ -1,11 +1,17 @@
 #include <lib.h>
 
 int main() {
-	barrier_alloc(10);
+	barrier_alloc(100);
 	for (int i = 0; i < 9; i++) {
 		int who = fork();
 		if (who == 0) {
 			debugf("I'm son!\n");
+			int whomm = fork();
+			if(whomm == 0) {
+				debugf("Im ss\n");
+				barrier_wait();
+				syscall_panic("Wrong www\n");
+			}
 			barrier_wait();
 			syscall_panic("Wrong block!");
 		}

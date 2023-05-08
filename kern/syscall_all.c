@@ -515,6 +515,7 @@ int sys_barrier_alloc(int n) {
 }
 
 void sys_barrier_wait() {
+	printk("barrier: %x\n", curenv->e_barrier);
 	if (curenv->e_barrier == NULL) {
 		return;
 	}
@@ -531,6 +532,7 @@ void sys_barrier_wait() {
 			TAILQ_INSERT_TAIL(&env_sched_list, curenv->e_barrier->envw[i], env_sched_link);
 		}
 		curenv->e_barrier = NULL;
+		schedule(1);
 	}
 }
 
