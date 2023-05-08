@@ -519,6 +519,11 @@ void sys_barrier_wait() {
 	if (curenv->e_barrier == NULL) {
 		return;
 	}
+
+	if (curenv->e_barrier->n == curenv->e_barrier->wait_cnt) {
+		curenv->e_barrier = NULL;
+		return;
+	}
 	
 	printk("wait_cnt: %d\n", curenv->e_barrier->wait_cnt);
 	if (curenv->e_barrier->wait_cnt < curenv->e_barrier->n) {
