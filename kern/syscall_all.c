@@ -269,6 +269,7 @@ int sys_exofork(void) {
 	/* Exercise 4.9: Your code here. (4/4) */
 	e->env_status = ENV_NOT_RUNNABLE;
 	e->env_pri = curenv->env_pri;
+	e->e_barrier = curenv->e_barrier;
 
 	return e->env_id;
 }
@@ -502,6 +503,38 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return 0;
 }
 
+#define BARRIER_VA 0x60000000
+
+int sys_barrier_alloc(int n) {
+	try(sys_mem_alloc(0, BARRIER_VA, PTE_D | PTE_LIBRARY));
+
+	curenv->e_barrier = (struct Barrier *)BARRIER_VA;
+	curenv->e_barrier->n = n;
+	curenv->e_barrier->wait_cnt = 0;
+	return 0;
+}
+
+void sys_barrier_wait() {
+	if (curenv->e_barrier == NULL) {
+		return;
+	}
+
+	if (curenv->e_barrier->wait_cnt < curenv->e_barrier->n - 1) {
+		curenv->env_status = ENV_NOT_RUNNABLE;
+		TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
+		curenv->e_barrier->envw[(curenv->e_barrier->wait_cnt)++] = curenv;
+		schedule(1);
+	}else if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n - 1) {
+		int i;
+		for(i = 0; i < curenv->e_barrier->n - 1; i++) {
+			curenv->e_barrier->envw[i]->env_status = ENV_RUNNABLE;
+			TAILQ_INSERT_TAIL(&env_sched_list, curenv->e_barrier->envw[i], env_sched_link);
+		}
+		curenv->e_barrier = NULL;
+	}
+}
+
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -521,6 +554,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_barrier_alloc] = sys_barrier_alloc,
+    [SYS_barrier_wait] = sys_barrier_wait,
 };
 
 /* Overview:
