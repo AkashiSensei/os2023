@@ -526,7 +526,7 @@ void sys_barrier_wait() {
 		//curenv->env_status = ENV_NOT_RUNNABLE;
 		//TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
 		curenv->e_barrier->envw[(curenv->e_barrier->wait_cnt)++] = curenv;
-		schedule(1);
+		//schedule(1);
 	}
 	//if(curenv->e_barrier->wait_cnt == curenv->e_barrier->n) {
 		//int i;
