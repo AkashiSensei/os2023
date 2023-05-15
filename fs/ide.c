@@ -6,6 +6,9 @@
 #include <drivers/dev_disk.h>
 #include <lib.h>
 #include <mmu.h>
+int ssdmap[32];
+char ssdcan[32];
+int ssdcnt[32];
 
 // Overview:
 //  read data from IDE disk. First issue a read request through
@@ -83,3 +86,96 @@ void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
 
 	}
 }
+
+
+void ssd_init() {
+	int i;
+	for(i = 0; i < 32; i++) {
+		ssdmap[i] = -1;
+		ssdcan[i] = 1;
+		ssdcnt[i] = 0;
+	}
+}
+
+int ssd_read(u_int logic_no, void *dst) {
+	if(ssdmap[logic_no] == -1) {
+		return -1;
+	}
+	ide_read(0, ssdmap[logic_no], dst, 1);
+	return 0;
+}
+
+void ssd_write(u_int logic_no, void *src) {
+	if (ssdmap[logic_no] != -1) {
+		// has data
+		ssd_erase(logic_no);
+	}
+	
+	int new_pno;
+	int less_cnt;
+	less_cnt = 2000000;
+	new_pno = -1;
+	int i;
+	for(i = 0; i < 32; i++) {
+		if(ssdcan[i] && ssdcnt[i] < less_cnt) {
+			less_cnt = ssdcnt[i];
+			new_pno = i;
+		}
+	}
+
+	if (new_pno == -1) {
+		user_panic("No ssd!\n");
+	}
+
+	if (less_cnt >= 5) {
+		int other_pno;
+		less_cnt = 2000000;
+		other_pno = -1;
+		for(i = 0; i < 32; i++ ) {
+			if(!ssdmap[i] && ssdcnt[i] < less_cnt) {
+				less_cnt = ssdcnt[i];
+				other_pno = i;
+			}
+		}
+
+		if(other_pno == -1) {
+			user_panic("No ssd2\n");
+		}
+
+		char temp_data[512];
+		ide_read(0, other_pno, (void *)temp_data, 1);
+		ide_write(0, new_pno, (void *)temp_data, 1);
+
+		for(i = 0; i < 32; i++) {
+			if(ssdmap[i] == other_pno) {
+				ssd_erase(i);
+				ssdmap[i] = new_pno;
+				ssdcan[new_pno] = 0;
+				break;
+			}
+		}
+
+		new_pno = other_pno;
+	}
+
+	ide_write(0, new_pno, src, 1);
+	ssdmap[logic_no] = new_pno;
+	ssdcan[new_pno] = 0;
+	return;
+}
+
+void ssd_erase(u_int logic_no) {
+	if (ssdmap[logic_no] == -1) {
+		return;
+	}
+
+	char empty[512];
+	memset(empty, 0, 512);
+
+	ide_write(0, ssdmap[logic_no], empty, 1);
+	ssdcnt[ssdmap[logic_no]]++;
+	ssdcan[ssdmap[logic_no]] = 1;
+	ssdmap[logic_no] = -1;
+}
+
+
