@@ -132,7 +132,7 @@ void ssd_write(u_int logic_no, void *src) {
 		less_cnt = 2000000;
 		other_pno = -1;
 		for(i = 0; i < 32; i++ ) {
-			if(!ssdmap[i] && ssdcnt[i] < less_cnt) {
+			if(!ssdcan[i] && ssdcnt[i] < less_cnt) {
 				less_cnt = ssdcnt[i];
 				other_pno = i;
 			}
@@ -145,21 +145,21 @@ void ssd_write(u_int logic_no, void *src) {
 		char temp_data[512];
 		ide_read(0, other_pno, (void *)temp_data, 1);
 		ide_write(0, new_pno, (void *)temp_data, 1);
-		ssdcan[new_pno] = 0;
+		// ssdcan[new_pno] = 0;
 		
 		for(i = 0; i < 32; i++) {
 			if(ssdmap[i] == other_pno) {
-				//ssd_erase(i);
+				ssd_erase(i);
 				ssdmap[i] = new_pno;
-				//ssdcan[new_pno] = 0;
+				ssdcan[new_pno] = 0;
 				break;
 			}
 		}
 
-		memset((void *)temp_data, 0, 512);
-		ide_write(0, other_pno, (void *)temp_data, 1);
-		ssdcnt[other_pno]++;
-		ssdcan[other_pno] = 1;
+		//memset((void *)temp_data, 0, 512);
+		//ide_write(0, other_pno, (void *)temp_data, 1);
+		//ssdcnt[other_pno]++;
+		//ssdcan[other_pno] = 1;
 
 		new_pno = other_pno;
 	}
