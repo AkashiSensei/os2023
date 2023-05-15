@@ -49,9 +49,6 @@ u_int get_time(u_int *us) {
 }
 
 void usleep(u_int us) {
-	if (us <= 0) {
-		return;
-	}
 
 	u_int start_time;
 	u_int start_us;
@@ -65,11 +62,12 @@ void usleep(u_int us) {
 
 	u_int now_time;
 	u_int now_us;
+
 	while (1) {
 		now_time = get_time(&now_us);
 		if (now_time > end_time) {
 			return;
-		}else if (now_us > end_us) {
+		}else if (now_time >= end_time && now_us > end_us) {
 			return;
 		}else {
 			syscall_yield();
