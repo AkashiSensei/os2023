@@ -37,3 +37,43 @@ u_int ipc_recv(u_int *whom, void *dstva, u_int *perm) {
 
 	return env->env_ipc_value;
 }
+
+u_int get_time(u_int *us) {
+	u_int temp;
+	temp = 0;
+	syscall_write_dev(&temp, 0x15000000, 4);
+	syscall_read_dev(&temp, 0x15000020, 4);
+	*us = temp;
+	syscall_read_dev(&temp, 0x15000010, 4);
+	return temp;
+}
+
+void usleep(u_int us) {
+	if (us <= 0) {
+		return;
+	}
+
+	u_int start_time;
+	u_int start_us;
+	start_time = get_time(&start_us);
+	
+	u_int end_time;
+	u_int end_us;
+
+	end_time = start_time + (start_us + us) / 1000000;
+	end_us = (start_us + us) % 1000000;
+
+	u_int now_time;
+	u_int now_us;
+	while (1) {
+		now_time = get_time(&now_us);
+		if (now_time > end_time) {
+			return;
+		}else if (now_us > end_us) {
+			return;
+		}else {
+			syscall_yield();
+		}
+	}
+}
+		
