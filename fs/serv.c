@@ -66,6 +66,45 @@ int open_alloc(struct Open **o) {
 	return -E_MAX_OPEN;
 }
 
+int walk_path_at(struct File *par_dir, char *path, struct File **pdir, struct File **pfile, char *lastelem);
+int open_lookup(u_int envid, u_int fileid, struct Open **po);
+void serve_openat(u_int envid, struct Fsreq_openat *rq) {
+	struct Open *pOpen;
+	int r;
+	if ((r = open_lookup(envid, rq->dir_fileid, &pOpen)) < 0) {
+		ipc_send(envid, r, 0, 0);
+		return;
+	}
+	struct File *dir = pOpen->o_file;
+
+	struct File *f;
+	struct Filefd *ff;
+	struct Open *o;
+
+	// Find a file id.
+	if ((r = open_alloc(&o)) < 0) {
+		ipc_send(envid, r, 0, 0);
+	}
+	
+	if((r = walk_path_at(dir, rq->req_path, 0, &f, 0)) < 0 ) {
+		ipc_send(envid, r, 0, 0);
+	}
+
+	// Save the file pointer.
+	o->o_file = f;
+
+	// Fill out the Filefd structure
+	ff = (struct Filefd *)o->o_ff;
+	ff->f_file = *f;
+	ff->f_fileid = o->o_fileid;
+	o->o_mode = rq->req_omode;
+	ff->f_fd.fd_omode = o->o_mode;
+	ff->f_fd.fd_dev_id = devfile.dev_id;
+
+	ipc_send(envid, 0, o->o_ff, PTE_D | PTE_LIBRARY);
+}
+
+
 // Overview:
 //  Look up an open file for envid.
 int open_lookup(u_int envid, u_int fileid, struct Open **po) {
@@ -88,7 +127,8 @@ int open_lookup(u_int envid, u_int fileid, struct Open **po) {
 void serve_open(u_int envid, struct Fsreq_open *rq) {
 	struct File *f;
 	struct Filefd *ff;
-	int r;
+
+int r;
 	struct Open *o;
 
 	// Find a file id.
@@ -243,6 +283,10 @@ void serve(void) {
 
 		case FSREQ_SYNC:
 			serve_sync(whom);
+			break;
+		
+		case FSREQ_OPENAT:
+			serve_openat(whom, (struct Fsreq_openat *)REQVA);
 			break;
 
 		default:
