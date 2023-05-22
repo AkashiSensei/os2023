@@ -138,3 +138,6 @@ int sync(void);
 #define O_MKDIR 0x0800 /* create directory, not regular file */
 
 #endif
+
+int openat(int dirfd, const char *path, int mode);
+int fsipc_openat(u_int, const char *, u_int, struct Fd *);

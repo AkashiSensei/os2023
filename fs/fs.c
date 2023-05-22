@@ -651,6 +651,41 @@ int walk_path(char *path, struct File **pdir, struct File **pfile, char *lastele
 	return 0;
 }
 
+int walk_path_at(struct File *par_dir, char *path, struct File **pdir, struct File **pfile, char *lastelem) {
+	char *p;
+	struct File *dir, *file;
+	int r;
+	char name[MAXNAMELEN];
+	name[0] = '\0';
+
+	path = skip_slash(path);
+	file = par_dir;
+	while (*path != '\0') {
+		dir = file;
+		p = path;
+
+		while  (*path != '/' && *path != '\0') {
+			path++;
+		}
+		
+		memcpy(name, p, path - p);
+		name[path - p] = '\0';
+		path = skip_slash(path);
+
+
+		if (dir->f_type != FTYPE_DIR) {
+			return -E_NOT_FOUND;
+		}
+		
+		if (( r = dir_lookup(dir, name, &file)) < 0 ) {
+			return r;
+		}
+	}
+	*pfile = file;
+	return 0;
+}
+
+
 // Overview:
 //  Open "path".
 //
