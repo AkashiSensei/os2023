@@ -70,7 +70,7 @@ int open(const char *path, int mode) {
 		memcpy(target, (char *)fd2data(fd), size);
 		target[size] = '\0';
 		file_close(fd); 
-		temp_fd = open(target, O_RDONLY);
+		temp_fd = open(target, O_RDWR);
 		return temp_fd;
 	}
 
