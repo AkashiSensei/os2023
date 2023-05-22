@@ -63,6 +63,16 @@ int open(const char *path, int mode) {
 			return r;
 		}
 	}
+	
+	if (ffd->f_file.f_type == FTYPE_LNK) {
+		int temp_fd;
+		char target[256];
+		memcpy(target, (char *)fd2data(fd), size);
+		target[size] = '\0';
+		file_close(fd); 
+		temp_fd = open(target, O_RDONLY);
+		return temp_fd;
+	}
 
 	// Step 5: Return the number of file descriptor using 'fd2num'.
 	/* Exercise 5.9: Your code here. (5/5) */
