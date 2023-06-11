@@ -57,6 +57,8 @@ void *alloc(u_int n, u_int align, int clear) {
 
 	// Panic if we're out of memory.
 	panic_on(PADDR(freemem) >= memsize);
+	
+	// printk("%x\n", alloced_mem);
 
 	/* Step 4: Clear allocated chunk if parameter `clear` is set. */
 	if (clear) {
@@ -76,6 +78,7 @@ void mips_vm_init() {
 	 * for physical memory management. Then, map virtual address `UPAGES` to
 	 * physical address `pages` allocated before. For consideration of alignment,
 	 * you should round up the memory size before map. */
+	// printk("start:");
 	pages = (struct Page *)alloc(npage * sizeof(struct Page), BY2PG, 1);
 	printk("to memory %x for struct Pages.\n", freemem);
 	printk("pmap.c:\t mips vm init success\n");
@@ -87,6 +90,8 @@ void mips_vm_init() {
  *
  * Hint: Use 'LIST_INSERT_HEAD' to insert free pages to 'page_free_list'.
  */
+
+extern void set_cp0_context(u_int vpt_base);
 void page_init(void) {
 	/* Step 1: Initialize page_free_list. */
 	/* Hint: Use macro `LIST_INIT` defined in include/queue.h. */
@@ -103,7 +108,9 @@ void page_init(void) {
 	while(index--) {
 		pages[index].pp_ref = 1;
 	}
-
+	// printk("start\n");
+	set_cp0_context(K2VPT);
+	// printk("end\n");
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
 	

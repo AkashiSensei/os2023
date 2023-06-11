@@ -1,5 +1,23 @@
 #include <env.h>
 #include <pmap.h>
+#include <printk.h>
+
+Pte _get_pgdir_pa(void) {
+    printk("get_pgdir_pa\n");
+    return (PADDR(cur_pgdir) | PTE_V | PTE_D);
+}
+
+// 保证已经为 ppte 指向的表项所在的逻辑页分配物理页
+Pte _fast_alloc(Pte *ppte) {
+    printk("alloc_page:%x\n", ppte);
+    struct Page *p = NULL;
+    panic_on(page_alloc(&p));
+    return *ppte = page2pa(p) | PTE_D | PTE_V;
+}
+
+
+
+
 
 static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 	struct Page *p = NULL;
@@ -20,8 +38,8 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 		panic("pages zone");
 	}
 
-	if (va >= ULIM) {
-		panic("kernel address");
+	if (va >= ULIM && va < KSEG2) {
+		panic("unavailable kernel address");
 	}
 
 	panic_on(page_alloc(&p));

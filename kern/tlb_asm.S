@@ -1,4 +1,66 @@
 #include <asm/asm.h>
+#include <stackframe.h>
+
+
+.extern direct_refill_badv
+.data
+fast_refill_ra:
+	.word 0
+
+.text
+NESTED(fast_tlb_refill, 0, zero)
+.set noreorder
+    mfc0 a0, CP0_BADVADDR # 保存失配虚地址映射的表项的指针，kseg2
+    srl a0, a0, 12
+    sll a0, a0, 2
+    li k0, K2VPT
+    addu a0, a0, k0
+    mfc0 s0, CP0_ENTRYHI # 上下文保存并不保存 ENTRYHI
+    li k0, K2VPDE
+    beq k0, a0, fast_get_pgdir_pa # 如果要读入的是页目录所在页的映射关系，则跳转
+    nop
+
+    lw v0, 0(a0) # 读入相应页表项，可能产生异常重入
+    j fast_valid_check
+    nop
+
+fast_get_pgdir_pa:
+    sw ra, fast_refill_ra
+    jal _get_pgdir_pa # 使用内核虚地址获取页目录物理地址，不会发生异常重入
+    nop
+    lw ra, fast_refill_ra
+    # 此时 v0 内容为待填充的表项内容，转换自页目录所在页的内核虚地址
+    j fast_refill
+    nop
+
+fast_valid_check: # 按理说来到这里成功读入页目录项的应该只可能是无效的页目录项，但保险起见还是做一下判断
+    andi k0, v0, PTE_V
+    bnez k0, fast_refill # 如果页表项有效位置位，则不进行分配
+    nop
+    sw ra, fast_refill_ra
+    jal _fast_alloc # 使用内核虚地址，不会发生异常重入
+    nop
+    lw ra, fast_refill_ra
+    # 此时 v0 为待填充的表项内容，获取自新分配的页
+
+fast_refill:
+    mtc0 s0, CP0_ENTRYHI # 从上下文的 s0 中恢复 CP0_ENTRYHI
+    mtc0 v0, CP0_ENTRYLO0
+    nop
+    tlbwr
+    nop
+fast_end:
+    jr ra
+    nop
+.set reorder
+END(fast_tlb_refill)
+
+
+
+
+
+
+
 
 LEAF(tlb_out)
 .set noreorder

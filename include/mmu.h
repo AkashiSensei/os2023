@@ -109,6 +109,12 @@
 #define UCOW (UTEXT - BY2PG)
 #define UTEMP (UCOW - BY2PG)
 
+// Lab 2 challenge
+#define K2VPT KSEG2
+#define K2VPD (K2VPT + (K2VPT >> 12 << 2))
+#define K2VPDE (K2VPD + (K2VPT >> 22 << 2))
+
+
 #ifndef __ASSEMBLER__
 
 /*

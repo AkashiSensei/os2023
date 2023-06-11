@@ -214,12 +214,17 @@ static int env_setup_vm(struct Env *e) {
 	 *   As a result, the address space of all envs is identical in [UTOP, UVPT).
 	 *   See include/mmu.h for layout.
 	 */
+	// e->env_pgdir[PDX(K2VPT)] = PADDR(e->env_pgdir) | PTE_V;
+
 	memcpy(e->env_pgdir + PDX(UTOP), base_pgdir + PDX(UTOP),
 	       sizeof(Pde) * (PDX(UVPT) - PDX(UTOP)));
-
+	// printk("in env_setup_vm ok");
 	/* Step 3: Map its own page table at 'UVPT' with readonly permission.
 	 * As a result, user programs can read its page table through 'UVPT' */
+	p->pp_ref++;
 	e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_V;
+	e->env_pgdir[PDX(K2VPT)] = PADDR(e->env_pgdir) | PTE_V;
+	// printk("env_set_up_ok");
 	return 0;
 }
 
