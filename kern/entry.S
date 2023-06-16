@@ -15,7 +15,7 @@ END(set_cp0_context)
 .section .text.tlb_miss_entry
 tlb_miss_entry:
 	j direct_tlb_refill
-
+	# j exc_gen_entry
 
 
 
