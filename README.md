@@ -4,13 +4,13 @@
 
 ## 我
 
-21系，22-23 国奖，os2023 的一名学生，os2024 的一名实验课助教。课程总成绩 98，实验成绩 87.6（没算挑战性任务），大概在助教里面是最低的 QAQ，实验具体小分见下。
+21系，22-23 国奖，os2023 的一名学生，os2024 的一名实验课助教。课程总成绩 98/100，实验成绩 87.6/90（没算挑战性任务），大概在助教里面是最低的 QAQ，实验具体小分见下。
 
 ![](https://raw.githubusercontent.com/AkashiSensei/os2023/master/img/score.png)
 
 虽然实验成绩并不是非常高，但大概还是留下了一些有参考价值的东西，希望能够帮助到有需要的同学。在本仓库中发现问题的话，可以开 ISSUE（建议使用这种方式，因为这样的话我不想看可以不看x），或者给我发邮件或者微信，微信二维码见下。如果有其它一些问题，包括但不限于本/其他课程学习方法等，也可以来找我交流。
 
-<img src="https://raw.githubusercontent.com/AkashiSensei/os2023/master/img/wechat.jpg" style="zoom:25%;" />
+<img src="https://raw.githubusercontent.com/AkashiSensei/os2023/master/img/wechat.jpg" width="150" height="150" align=center />
 
 我也不知道把它放在这里是不是合适，觉得不合适了就会删掉。
 
